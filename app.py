@@ -1,12 +1,27 @@
-from flask import Flask,render_template,request, redirect,url_for,flash
-from model import db,user,flaggedUser
+from flask import Flask,render_template,request, redirect,url_for,flash,session
+from model import db,User
+from werkzeug.security import generate_password_hash, check_password_hash
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI']='sqlite://rwwj.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db.init_app(app)
 with app.app_context():
     db.create_all()
+    admin = User.query.filter_by(username='admin123').first()
+    if not admin:
+        admin_user = User(
+            username='admin123',
+            password=generate_password_hash('adminpassword'),
+            role='admin',
+            company_name=None,
+            category=None,
+            niche=None
+        )
+        db.session.add(admin_user)
+        db.session.commit()
+
 @app.route("/")
 def hello_world():
     return "<p>Hello,World!</p>"
@@ -36,37 +51,91 @@ def login():
     if request.method == 'POST':
         uname = request.form['username']
         password = request.form['password']
-        if uname == 'admin123' and password == 'pwd':
+        user = User.query.filter_by(username=uname, role='admin').first()
+        if user and check_password_hash(user.password, password):
+            session['user_id'] = user.id
+            session['role'] = user.role
             return redirect(url_for('admin_dash'))
+        else:
+            flash('Invalid username or password', 'danger')
     return render_template('admin_login.html')
 
-# @app.route("/user_login",methods=['GET','POST'])
-# def login_u():    
-#     if request.method=='POST':
-#         uname=request.form['username']
-#         if uname !='':
-#             if request.form['password']!='':
-#                 return f"Welcome,{uname}!"
-#     return render_template("user_login.html")
-@app.route("/signup",methods=['GET','POST'])
-def signup():    
-    if request.method=='POST':
-        uname=request.form['username']
-        if uname.isalnum() :
-            if request.form['password']!="":
-                indus=request.form['industry']
-                return f"Welcome,{uname}, your account has been created! Your industry is {indus}"
-@app.route("/signup_infl",methods=['GET','POST'])
-def signup_infl():    
-    if request.method=='POST':
-        uname=request.form['username']
-        if uname.isalnum() :
-            if request.form['password']!="":
-                platforms = request.form.getlist('platform')
-                platform_list = ", ".join(platforms) 
+@app.route('/user_login', methods=['GET', 'POST'])
+def user_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            session['user_id'] = user.id
+            session['role'] = user.role
+            if user.role == 'sponsor':
+                return redirect(url_for('sponsor_profile'))
+            elif user.role == 'influencer':
+                return redirect(url_for('influencer_profile'))
+        else:
+            flash('Invalid username or password', 'danger')
+    return render_template('user_login.html')
 
-                return f"Welcome,{uname}, your account has been created! Your platform is  {platform_list}"                
-    return render_template("signup_infl.html")
+# Sponsor signup
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        company_name = request.form['company_name']
+        industry = request.form['industry']
+        budget = float(request.form['budget'])
+
+        # Create new sponsor user
+        new_user = User(
+            username=username,
+            password=generate_password_hash(password),
+            role='sponsor',
+            company_name=company_name,
+            name=None,
+            category=industry,
+            niche=None,
+            reach=None,
+            budget=budget,
+            platforms=None
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Signup successful! Please log in.', 'success')
+        return redirect(url_for('user_login'))
+    return render_template('signup.html')
+
+@app.route('/signup_infl', methods=['GET', 'POST'])
+def signup_infl():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        name = request.form['name']
+        category = request.form['category']
+        niche = request.form['niche']
+        reach = int(request.form['reach'])
+
+        # Create new influencer user
+        new_user = User(
+            username=username,
+            password=generate_password_hash(password),
+            role='influencer',
+            company_name=None,  # No company_name for influencers
+            name=name,
+            category=category,
+            niche=niche,
+            reach=reach,
+            budget=None,
+            platforms = ','.join(request.form.getlist('platforms'))  # Convert list to comma-separated string
+
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Signup successful! Please log in.', 'success')
+        return redirect(url_for('user_login'))
+    return render_template('signup_infl.html')
 
 @app.route('/admin_dash')
 def admin_dash():
@@ -137,16 +206,6 @@ sponsor_requests = [
     {"id": 2, "ad_details": "Fashion week promotion", "status": "pending"}
 ]
 
-@app.route('/influencer_login', methods=['GET', 'POST'])
-def influencer_login():
-    if request.method == 'POST':
-        uname = request.form['username']
-        password = request.form['password']
-        if uname == 'inf123' and password == 'pwd':
-            return redirect(url_for('influencer_profile'))
-        else:
-            flash('Invalid username or password', 'danger')
-    return render_template('influencer_login.html')
 
 @app.route('/influencer_profile')
 def influencer_profile():
@@ -190,16 +249,6 @@ sponsor_profile_data = {
     ]
 }
 
-@app.route('/sponsor_login', methods=['GET', 'POST'])
-def sponsor_login():
-    if request.method == 'POST':
-        uname = request.form['username']
-        password = request.form['password']
-        if uname == 'sponsor123' and password == 'pwd':
-            return redirect(url_for('sponsor_profile'))
-        else:
-            flash('Invalid username or password', 'danger')
-    return render_template('user_login.html')
 
 @app.route('/sponsor_profile')
 def sponsor_profile():
@@ -256,4 +305,4 @@ def add_ad_request(campaign_id):
 def sponsor_stats():
     return render_template('sponsor_stats.html')
 
-app.run(debug=True,port=5500)
+app.run(debug=True,port=6600)
