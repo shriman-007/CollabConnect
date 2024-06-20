@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Welcome to the Admin Dashboard</h1>
+    <div class="my-4">
+        <h2>Ongoing Campaign Progress</h2>
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">{{ progress }}%</div>
+        </div>
+    </div>
+    <div class="my-4">
+        <h2>Flagged Campaigns</h2>
+        <ul class="list-group">
+            {% for campaign in flagged_campaigns %}
+                <li class="list-group-item">
+                    <strong>{{ campaign.name }}</strong> - {{ campaign.reason }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
+

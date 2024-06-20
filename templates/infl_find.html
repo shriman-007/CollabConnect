@@ -1,0 +1,26 @@
+{% extends "base_inf.html" %}
+
+{% block content %}
+    <h1>Find Sponsors and Campaigns</h1>
+    <form method="post" action="{{ url_for('find_infl') }}">
+        <div class="form-group">
+            <label for="search_query">Search</label>
+            <input type="text" id="search_query" name="search_query" class="form-control" placeholder="Enter search term" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    {% if results1 %}
+        <div class="mt-4">
+            <h2>Search Results</h2>
+            <ul class="list-group">
+                {% for result in results1 %}
+                    <li class="list-group-item">
+                        <strong>{{ result.name }}</strong> - {{ result.type }}<br>
+                        {{ result.description }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endblock %}

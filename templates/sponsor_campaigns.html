@@ -1,0 +1,21 @@
+{% extends "base_spon.html" %}
+
+{% block content %}
+    <h1>Campaigns</h1>
+    <div class="row">
+        {% for campaign in campaigns %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ campaign['image'] }}" class="card-img-top" alt="{{ campaign['title'] }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ campaign['title'] }}</h5>
+                        <p class="card-text">{{ campaign['description'] }}</p>
+                        <p class="card-text"><strong>Budget:</strong> {{ campaign['budget'] }}</p>
+                        <a href="{{ url_for('add_ad_request', campaign_id=campaign['id']) }}" class="btn btn-primary">Create New Ad Request</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <a href="{{ url_for('add_campaign') }}" class="btn btn-success btn-lg" style="position: fixed; bottom: 20px; right: 20px;">+</a>
+{% endblock %}

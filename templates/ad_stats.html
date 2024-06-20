@@ -1,0 +1,57 @@
+{% extends "base_stats.html" %}
+
+{% block content %}
+    <h1>Admin Stats</h1>
+    <canvas id="userGrowthChart"></canvas>
+    <canvas id="campaignPerformanceChart"></canvas>
+    <canvas id="platformEngagementChart"></canvas>
+
+    <script>
+        // User Growth Over Time
+        var ctx1 = document.getElementById('userGrowthChart').getContext('2d');
+        var userGrowthChart = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                datasets: [{
+                    label: 'User Growth',
+                    data: [50, 100, 150, 200, 250, 300],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true,
+                }]
+            }
+        });
+
+        // Campaign Performance
+        var ctx2 = document.getElementById('campaignPerformanceChart').getContext('2d');
+        var campaignPerformanceChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['Campaign 1', 'Campaign 2', 'Campaign 3', 'Campaign 4'],
+                datasets: [{
+                    label: 'Performance',
+                    data: [60, 70, 80, 90],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            }
+        });
+
+        // Platform Engagement
+        var ctx3 = document.getElementById('platformEngagementChart').getContext('2d');
+        var platformEngagementChart = new Chart(ctx3, {
+            type: 'pie',
+            data: {
+                labels: ['Campaigns', 'Ads', 'Messages', 'Profile'],
+                datasets: [{
+                    data: [30, 40, 15, 15],
+                    backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)'],
+                    borderWidth: 1
+                }]
+            }
+        });
+    </script>
+{% endblock %}

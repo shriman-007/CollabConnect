@@ -1,0 +1,34 @@
+{% extends "base_inf.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-4">
+            <img src="{{ profile['profile_picture'] }}" alt="Profile Picture" class="img-fluid rounded-circle">
+        </div>
+        <div class="col-md-8">
+            <h1>{{ profile['name'] }}</h1>
+            <p>Ratings: {{ profile['ratings'] }} / 5</p>
+            <p>Earnings: {{ profile['earnings'] }}</p>
+            <div class="my-4">
+                <h2>Campaign Progress</h2>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ profile['campaign_progress'] }}%;" aria-valuenow="{{ profile['campaign_progress'] }}" aria-valuemin="0" aria-valuemax="100">{{ profile['campaign_progress'] }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="my-4">
+        <h2>Incoming Requests from Sponsors</h2>
+        <ul class="list-group">
+            {% for request in sponsor_requests %}
+                <li class="list-group-item">
+                    <p>{{ request['ad_details'] }}</p>
+                    <a href="{{ url_for('request_action', request_id=request['id'], action='view') }}" class="btn btn-info">View</a>
+                    <a href="{{ url_for('request_action', request_id=request['id'], action='accept') }}" class="btn btn-success">Accept</a>
+                    <a href="{{ url_for('request_action', request_id=request['id'], action='reject') }}" class="btn btn-danger">Reject</a>
+                    <a href="{{ url_for('request_action', request_id=request['id'], action='renegotiate') }}" class="btn btn-warning">Renegotiate</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
