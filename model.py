@@ -15,6 +15,8 @@ class User(db.Model):
     platforms = db.Column(db.String(120))  # Store platforms as comma-separated string
 
 class Campaign(db.Model):
+    __tablename__ = 'campaigns'
+
     id = db.Column(db.Integer, primary_key=True)
     campaign_name = db.Column(db.String(120), nullable=False)
     category = db.Column(db.String(80))
@@ -25,3 +27,17 @@ class Campaign(db.Model):
     progress = db.Column(db.Integer)
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
+    ad_requests = db.relationship('AdRequest', back_populates='campaign', cascade="all, delete-orphan")
+
+class AdRequest(db.Model):
+    __tablename__ = 'ad_requests'
+    id = db.Column(db.Integer, primary_key=True)
+    campaign_id = db.Column(db.Integer, db.ForeignKey('campaigns.id'), nullable=False)
+    ad_name = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    budget = db.Column(db.Float, nullable=False)
+    goal = db.Column(db.String(120), nullable=False)
+    influencer_name = db.Column(db.String(100), nullable=True)
+    status = db.Column(db.String(120), nullable=False)
+    campaign = db.relationship('Campaign', back_populates='ad_requests')
+

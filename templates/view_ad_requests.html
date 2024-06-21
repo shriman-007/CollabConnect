@@ -1,0 +1,21 @@
+{% extends "base_spon.html" %}
+
+{% block content %}
+    <h1>Ad Requests for Campaign: {{ campaign.campaign_name }}</h1>
+    <div class="row">
+        {% for ad_request in ad_requests %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ ad_request.ad_name }}</h5>
+                        <p class="card-text"><strong>Description:</strong> {{ ad_request.description }}</p>
+                        <p class="card-text"><strong>Budget:</strong> ${{ ad_request.budget }}</p>
+                        <p class="card-text"><strong>Goal:</strong> {{ ad_request.goal }}</p>
+                        <p class="card-text"><strong>Status:</strong> {{ ad_request.status }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <a href="{{ url_for('sponsor_campaigns') }}" class="btn btn-primary">Back to Campaigns</a>
+{% endblock %}

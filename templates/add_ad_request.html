@@ -12,17 +12,22 @@
             <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
         </div>
         <div class="form-group">
-            <label for="term">Term</label>
-            <input type="text" class="form-control" id="term" name="term" required>
+            <label for="budget">Budget</label>
+            <input type="number" class="form-control" id="budget" name="budget" required>
         </div>
         <div class="form-group">
-            <label for="payment">Payment</label>
-            <input type="text" class="form-control" id="payment" name="payment" required>
+            <label for="goal">Goal</label>
+            <input type="text" class="form-control" id="goal" name="goal" required>
         </div>
         <div class="form-group">
-            <label for="influencer_assigned">Influencer Assigned</label>
-            <input type="text" class="form-control" id="influencer_assigned" name="influencer_assigned" required>
+            <label for="status">Status</label>
+            <input type="text" class="form-control" id="status" name="status" required>
         </div>
+        <div class="form-group">
+            <label for="influencer_name">Influencer Name</label>
+            <input type="text" class="form-control" id="influencer_name" name="influencer_name">
+        </div>
+        <a href="{{ url_for('find_sponsor') }}" class="btn btn-secondary mb-3">Find Influencer</a>
         <button type="submit" class="btn btn-primary">Create Ad Request</button>
     </form>
 {% endblock %}

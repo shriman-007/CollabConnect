@@ -1,6 +1,7 @@
 from flask import Flask,render_template,request, redirect,url_for,flash,session
-from model import db,User
+from model import db,User,Campaign,AdRequest
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -22,9 +23,10 @@ with app.app_context():
         db.session.add(admin_user)
         db.session.commit()
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello,World!</p>"
+@app.route('/')
+def landing_page():
+    return render_template('landing_page.html')
+
 @app.route("/signup/<name>")
 def hello(name):
     return f"<p>Hello, {name}</p>"
@@ -185,13 +187,13 @@ def find():
 
     return render_template('ad_find.html', results=results)
 
-@app.route('/admin_stats')
+@app.route('/ad_stats')
 def stats():
     return render_template('ad_stats.html')
 
 @app.route('/logout')
 def logout():
-    return "You have been logged out."
+    return render_template('landing_page.html')
 
 profile = {
     "name": "Influencer Name",
@@ -221,7 +223,7 @@ def find_infl():
         results1 = [item for item in sponsors + campaigns if search_query in item['name'].lower() or search_query in item['description'].lower()]
     return render_template('infl_find.html',results1=results1)
 
-@app.route('/infl_stats')
+@app.route('/infl_stat')
 def stats_inf():
     return render_template('infl_stat.html')
 
@@ -257,6 +259,7 @@ def sponsor_profile():
 
 @app.route('/sponsor/campaigns')
 def sponsor_campaigns():
+    campaigns = Campaign.query.all()
     return render_template('sponsor_campaigns.html',campaigns=campaigns)
 
 @app.route('/sponsor/find_sponsor',methods=['GET','POST'])
@@ -270,39 +273,72 @@ def find_sponsor():
 @app.route('/add_campaign', methods=['GET', 'POST'])
 def add_campaign():
     if request.method == 'POST':
-        # In a real application, this data would be saved to a database
-        new_campaign = {
-            "id": len(campaigns) + 1,
-            "title": request.form['title'],
-            "description": request.form['description'],
-            "image": request.form['image'],
-            "niche": request.form['niche'],
-            "date": request.form['date'],
-            "budget": "$0"  # Default value for demonstration
-        }
-        campaigns.append(new_campaign)
-        return redirect(url_for('sponsor_campaigns'))
+        campaign_name = request.form['campaign_name']
+        category = request.form['category']
+        budget = float(request.form['budget'])
+        status = request.form['status']
+        products = request.form['products']
+        goals = request.form['goals']
+        progress = int(request.form['progress'])
+        start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%d').date()
+        end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d').date()
+
+        # Create new campaign
+        new_campaign = Campaign(
+            campaign_name=campaign_name,
+            category=category,
+            budget=budget,
+            status=status,
+            products=products,
+            goals=goals,
+            progress=progress,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+        # Add campaign to the database
+        db.session.add(new_campaign)
+        db.session.commit()
+
+        return redirect(url_for('sponsor_campaigns'))  # Redirect to sponsor dashboard after campaign creation
+
     return render_template('add_campaign.html')
 
 @app.route('/add_ad_request/<int:campaign_id>', methods=['GET', 'POST'])
 def add_ad_request(campaign_id):
+    campaign = Campaign.query.get_or_404(campaign_id)
     if request.method == 'POST':
-        # In a real application, this data would be saved to a database
-        new_ad_request = {
-            "ad_name": request.form['ad_name'],
-            "description": request.form['description'],
-            "term": request.form['term'],
-            "payment": request.form['payment'],
-            "influencer_assigned": request.form['influencer_assigned']
-        }
-        # Here, you would typically save the new ad request to the campaign in the database
+        ad_name = request.form['ad_name']
+        description = request.form['description']
+        budget = float(request.form['budget'])
+        goal = request.form['goal']
+        influencer_name = request.form['influencer_name']
+        status = request.form['status']
+
+        new_ad_request = AdRequest(
+            campaign_id=campaign_id,
+            ad_name=ad_name,
+            description=description,
+            budget=budget,
+            goal=goal,
+            influencer_name=influencer_name,
+            status=status
+        )
+
+        db.session.add(new_ad_request)
+        db.session.commit()
         flash('Ad request created successfully!', 'success')
-        return redirect(url_for('sponsor_campaigns'))
+        return redirect(url_for('sponsor_campaigns'))    
     return render_template('add_ad_request.html', campaign_id=campaign_id)
 
+@app.route('/view_ad_requests/<int:campaign_id>', methods=['GET'])
+def view_ad_requests(campaign_id):
+    campaign = Campaign.query.get_or_404(campaign_id)
+    ad_requests = AdRequest.query.filter_by(campaign_id=campaign_id).all()
+    return render_template('view_ad_requests.html', campaign=campaign, ad_requests=ad_requests)
 
 @app.route('/sponsor/stats')
 def sponsor_stats():
     return render_template('sponsor_stats.html')
 
-app.run(debug=True,port=6600)
+app.run(debug=True,port=6100)
