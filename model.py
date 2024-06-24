@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 db=SQLAlchemy()
 
 class User(db.Model):
@@ -18,6 +19,7 @@ class Campaign(db.Model):
     __tablename__ = 'campaigns'
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Added user_id
     campaign_name = db.Column(db.String(120), nullable=False)
     category = db.Column(db.String(80))
     budget = db.Column(db.Float)
@@ -28,9 +30,14 @@ class Campaign(db.Model):
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
     ad_requests = db.relationship('AdRequest', back_populates='campaign', cascade="all, delete-orphan")
+    
+    # Relationship with User
+    sponsor = db.relationship('User', backref=db.backref('campaigns', lazy=True))
+
 
 class AdRequest(db.Model):
     __tablename__ = 'ad_requests'
+    
     id = db.Column(db.Integer, primary_key=True)
     campaign_id = db.Column(db.Integer, db.ForeignKey('campaigns.id'), nullable=False)
     ad_name = db.Column(db.String(120), nullable=False)
@@ -39,5 +46,21 @@ class AdRequest(db.Model):
     goal = db.Column(db.String(120), nullable=False)
     influencer_name = db.Column(db.String(100), nullable=True)
     status = db.Column(db.String(120), nullable=False)
+    
+    # Relationship with Campaign
     campaign = db.relationship('Campaign', back_populates='ad_requests')
 
+    # Added user_id for the sponsor who created the campaign
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Relationship with User
+    sponsor = db.relationship('User', backref=db.backref('ad_requests', lazy=True))
+
+
+class FlaggedUser(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    username = db.Column(db.String(150), nullable=False)
+    role = db.Column(db.String(50), nullable=False)
+    flagged_date = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship('User', backref=db.backref('flagged', lazy=True))

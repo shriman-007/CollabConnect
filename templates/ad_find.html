@@ -1,26 +1,52 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Find Influencers, Sponsors, and Campaigns</h1>
+    <h1>Find Influencers and Campaigns</h1>
     <form method="post" action="{{ url_for('find') }}">
         <div class="form-group">
             <label for="search_query">Search</label>
-            <input type="text" id="search_query" name="search_query" class="form-control" placeholder="Enter search term" required>
+            <input type="text" class="form-control" id="search_query" name="search_query" required>
         </div>
         <button type="submit" class="btn btn-primary">Search</button>
     </form>
 
     {% if results %}
-        <div class="mt-4">
-            <h2>Search Results</h2>
-            <ul class="list-group">
-                {% for result in results %}
-                    <li class="list-group-item">
-                        <strong>{{ result.name }}</strong> - {{ result.type }}<br>
-                        {{ result.description }}
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
+        <h2 class="mt-4">Search Results</h2>
+        
+        <h3>Users</h3>
+        <ul class="list-group mb-4">
+            {% for user in results.users %}
+                <li class="list-group-item">
+                    <strong>{{ user.username }}</strong> - {{ user.role }}
+                    {% if user.role == 'influencer' %}
+                        <p><strong>Category:</strong> {{ user.category }}</p>
+                        <p><strong>Niche:</strong> {{ user.niche }}</p>
+                        <p><strong>Reach:</strong> {{ user.reach }}</p>
+                        <p><strong>Platforms:</strong> {{ user.platforms }}</p>
+                    {% endif %}
+                    {% if user.role == 'sponsor' %}
+                        <p><strong>Company Name:</strong> {{ user.company_name }}</p>
+                        <p><strong>Budget:</strong> {{ user.budget }}</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+        
+        <h3>Campaigns</h3>
+        <ul class="list-group">
+            {% for campaign in results.campaigns %}
+                <li class="list-group-item">
+                    <strong>{{ campaign.campaign_name }}</strong>
+                    <p><strong>Category:</strong> {{ campaign.category }}</p>
+                    <p><strong>Budget:</strong> ${{ campaign.budget }}</p>
+                    <p><strong>Status:</strong> {{ campaign.status }}</p>
+                    <p><strong>Products:</strong> {{ campaign.products }}</p>
+                    <p><strong>Goals:</strong> {{ campaign.goals }}</p>
+                    <p><strong>Progress:</strong> {{ campaign.progress }}%</p>
+                    <p><strong>Start Date:</strong> {{ campaign.start_date }}</p>
+                    <p><strong>End Date:</strong> {{ campaign.end_date }}</p>
+                </li>
+            {% endfor %}
+        </ul>
     {% endif %}
 {% endblock %}

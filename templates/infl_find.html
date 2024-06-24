@@ -13,14 +13,40 @@
     {% if results1 %}
         <div class="mt-4">
             <h2>Search Results</h2>
-            <ul class="list-group">
-                {% for result in results1 %}
-                    <li class="list-group-item">
-                        <strong>{{ result.name }}</strong> - {{ result.type }}<br>
-                        {{ result.description }}
-                    </li>
-                {% endfor %}
-            </ul>
+
+            {% if results1.users %}
+                <h3>Users</h3>
+                <ul class="list-group mb-4">
+                    {% for user in results1.users %}
+                        <li class="list-group-item">
+                            <strong>{{ user.username }}</strong> - Sponsor<br>
+                            {% if user.company_name %}
+                                Company: {{ user.company_name }}<br>
+                            {% endif %}
+                            {% if user.name %}
+                                Name: {{ user.name }}<br>
+                            {% endif %}
+                            Category: {{ user.category }}<br>
+                            Niche: {{ user.niche }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if results1.campaigns %}
+                <h3>Campaigns</h3>
+                <ul class="list-group">
+                    {% for campaign in results1.campaigns %}
+                        <li class="list-group-item">
+                            <strong>{{ campaign.campaign_name }}</strong><br>
+                            Category: {{ campaign.category }}<br>
+                            Products: {{ campaign.products }}<br>
+                            Goals: {{ campaign.goals }}<br>
+                            Budget: ${{ campaign.budget }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
         </div>
     {% endif %}
 {% endblock %}
