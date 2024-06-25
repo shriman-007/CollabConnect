@@ -187,19 +187,19 @@ def flagged_user_profile(flagged_user_id):
     flagged_user = FlaggedUser.query.get(flagged_user_id)
     return render_template('flagged_user_profile.html', flagged_user=flagged_user)
 
-# Sample data
-influencers = [
-    {"name": "virat", "type": "Influencer", "description": "Expert in tech reviews."},
-    {"name": "sachin", "type": "Influencer", "description": "Fashion and lifestyle guru."},
-]
-sponsors = [
-    {"name": "adidas", "type": "Sponsor", "description": "Looking to sponsor sports events."},
-    {"name": "boost", "type": "Sponsor", "description": "Interested in fashion and beauty campaigns."},
-]
-campaigns = [
-    {"id":1,"name": "run for tech", "type": "Campaign", "description": "Tech product launch."},
-    {"id":2,"name": "rampwalk modelling", "type": "Campaign", "description": "Fashion week promotion."},
-]
+# # Sample data
+# influencers = [
+#     {"name": "virat", "type": "Influencer", "description": "Expert in tech reviews."},
+#     {"name": "sachin", "type": "Influencer", "description": "Fashion and lifestyle guru."},
+# ]
+# sponsors = [
+#     {"name": "adidas", "type": "Sponsor", "description": "Looking to sponsor sports events."},
+#     {"name": "boost", "type": "Sponsor", "description": "Interested in fashion and beauty campaigns."},
+# ]
+# campaigns = [
+#     {"id":1,"name": "run for tech", "type": "Campaign", "description": "Tech product launch."},
+#     {"id":2,"name": "rampwalk modelling", "type": "Campaign", "description": "Fashion week promotion."},
+# ]
 
 # @app.route('/ad_find', methods=['GET', 'POST'])
 # def find():
@@ -581,10 +581,32 @@ def delete_ad_request(ad_request_id):
     flash('Ad request deleted successfully!', 'success')
     return redirect(url_for('view_ad_requests', campaign_id=campaign_id))
 
+@app.route('/renegotiate_ad_request/<int:request_id>', methods=['POST'])
+def renegotiate_ad_request(request_id):
+    # Check if sponsor ID is in session
+    if 'user_id' in session:
+        sponsor_id = session['user_id']
+        # Fetch the ad request from the database
+        ad_request = AdRequest.query.filter_by(id=request_id, user_id=sponsor_id).first()
+        if ad_request:
+            # Update renegotiation details based on form submission
+            ad_request.renegotiate_details = request.form['renegotiate_details']
+            # Add other fields here
+            # Commit changes to the database
+            db.session.commit()
+            # Redirect to sponsor profile page after updating
+            return redirect(url_for('sponsor_profile'))
+        else:
+            # Handle case where ad request ID does not match any request for the logged-in sponsor
+            return "Ad request not found."
+    else:
+        # Handle case where sponsor is not logged in
+        return "Please log in as a sponsor."
+
+
 @app.route('/sponsor/stats')
 def sponsor_stats():
     return render_template('sponsor_stats.html')
 
-
-
-app.run(debug=True,port=6200)
+if __name__ == '__main__':
+    app.run(debug=True)
